@@ -6,6 +6,9 @@ from datetime import timedelta
 from datetime import datetime as dt
 from datetime import time as tt
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -58,6 +61,7 @@ def main():
     lecture_rest_time = "//div[@style='float: left;margin-left: 7px;margin-top:3px;']"
 
     play = "vc-front-screen-play-btn"
+
     """
     button setting이 완료 되셨나요? 곧 시작합니다.
     """
@@ -158,9 +162,17 @@ def main():
                         "| 남은 시간: {remain} | 들은 시간: {listen} | 전체 시간: {total} | \n"
                         "+-------------------------------------------------------+\n"
                     )
+                    iframe = WebDriverWait(browser, 20).until(
+                        EC.presence_of_element_located((By.ID, "contentViewer"))
+                    )
+                    browser.switch_to.frame(iframe)
+
                     play_button = browser.find_element(By.CLASS_NAME, play)
                     play_button.click()
-                    
+                    time.sleep(0.5)
+
+                    browser.switch_to.default_content()
+
                     while lec_rest_time > 0:
                         delay_datetime = dt.now() + timedelta(seconds=1)
                         pause.until(delay_datetime)
