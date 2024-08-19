@@ -33,13 +33,13 @@
 }
 ```
 
-​		예시는 학번이 161000000이고, Password가 Mypassword123!@# 입니다.
+​		예시는 학번이 16100000이고, Password가 Mypassword123!@# 입니다.
 
 
 
 2. chromedriver.exe
 
-​		AI 매크로가 사용할 chrome 프로그램입니다. 반드시 현재 설치되어 있는 chrome의 버전과 맞는 driver를 설치하셔야합니다. 
+​		프로그램이 사용할 chrome 프로그램입니다. 반드시 현재 설치되어 있는 chrome의 버전과 맞는 driver를 설치하셔야합니다. 
 
 ​		chrome 버전 확인 방법:
 
