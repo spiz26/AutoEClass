@@ -6,6 +6,7 @@ from datetime import timedelta
 from datetime import datetime as dt
 from datetime import time as tt
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -30,6 +31,7 @@ with open(user_data_path, "r") as f:
 # user data 파일 읽기
 yourID = user_data["ID"]
 yourPW = user_data["Password"]
+Delay = int(user_data["Delay"])
 
 """
 =============================================================================
@@ -60,7 +62,9 @@ def main():
     complete_tag = "per_text"
     lecture_rest_time = "//div[@style='float: left;margin-left: 7px;margin-top:3px;']"
 
+    # 온라인 강의
     play = "vc-front-screen-play-btn"
+    volume_btn = "vc-pctrl-volume-btn"
 
     """
     button setting이 완료 되셨나요? 곧 시작합니다.
@@ -80,19 +84,20 @@ def main():
     chrome_options.add_argument('--ignore-ssl-errors')
     chrome_options.add_argument('--disable-web-security')
     chrome_options.add_argument('--allow-running-insecure-content')
+    chrome_options.page_load_strategy = 'eager'
     service = Service("chromedriver.exe")
 
     # e-class 접속
     browser = webdriver.Chrome(service=service, options=chrome_options)
     browser.get(url)
     browser.maximize_window()
-    browser.implicitly_wait(5)
+    browser.implicitly_wait(Delay)
 
     # e-class 로그인
     browser.find_element(By.ID, userID).send_keys(yourID)
     browser.find_element(By.ID, userPW).send_keys(yourPW)
     browser.find_element(By.CLASS_NAME, login).click()
-    browser.implicitly_wait(5)
+    browser.implicitly_wait(Delay)
 
     # 과목 찾기
     subjects = browser.find_elements(By.CLASS_NAME, open_subject)
@@ -110,14 +115,14 @@ def main():
     # 과목 듣기
     for sub_i in range(num_subjects):
         browser.find_element(By.ID, seoultech_logo).click()
-        browser.implicitly_wait(5)
+        browser.implicitly_wait(Delay)
 
         # 과목 다시 찾기
         subjects = browser.find_elements(By.CLASS_NAME, open_subject) # 페이지가 reload되어 다시 찾아야 함.
 
         subject = subjects[sub_i]
         subject.click()
-        browser.implicitly_wait(5)
+        browser.implicitly_wait(Delay)
 
         # lecture room
         browser.find_element(By.ID, lecuture_room).click()
@@ -128,8 +133,12 @@ def main():
         # 과목의 해당 주차 듣기
         for week in week_list:
             # 해당 주차 수업 들어가기
-            browser.find_element(By.ID, f"week-{week}").click()
-            browser.implicitly_wait(5)
+            try:
+                browser.find_element(By.ID, f"week-{week}").click()
+                browser.implicitly_wait(Delay)
+
+            except NoSuchElementException:
+                continue
 
             lectures_per_week = browser.find_elements(By.CLASS_NAME, lecture_num)
             num_lectures = len(lectures_per_week)
@@ -149,7 +158,7 @@ def main():
                 else:
                     lec_rest_time, listen_time, total_time = RestTime(rest_time_list[lecture_i])
                     lectures_per_week[lecture_i].click()
-                    browser.implicitly_wait(5)
+                    browser.implicitly_wait(Delay)
 
                     if first:
                         print("\n\n\n\n")
@@ -168,7 +177,10 @@ def main():
                     browser.switch_to.frame(iframe)
 
                     play_button = browser.find_element(By.CLASS_NAME, play)
+                    volume_button = browser.find_element(By.CLASS_NAME, volume_btn)
+                
                     play_button.click()
+                    volume_button.click()
                     time.sleep(0.5)
 
                     browser.switch_to.default_content()
