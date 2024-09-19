@@ -1,6 +1,8 @@
 
 from datetime import datetime
 from datetime import timedelta
+import time
+from selenium.common.exceptions import NoAlertPresentException
 
 def RestTime(time_string):
     """남은 시간 계산을 계산합니다"""
@@ -50,3 +52,26 @@ def convert_seconds(seconds: int) -> str:
         return f"{minutes:02}:{seconds:02}"
     else:
         return f"{seconds:02}"
+
+def AlertProcessing(browser):
+    try:
+        alert = browser.switch_to.alert
+        print(f"Alert text: {alert.text}")
+        alert.dismiss()
+        print("제때 강의를 들었어야죠ㅠㅠ")
+        time.sleep(0.2)
+        return True
+
+    except NoAlertPresentException:
+        return False
+
+def other_device(browser):
+    try:
+        time.sleep(0.5)
+        alert = browser.switch_to.alert
+        print(f"Alert text: {alert.text}")
+        alert.accept()
+        print("다른 기기에서의 연결을 해제합니다.")
+
+    except NoAlertPresentException:
+        pass

@@ -64,7 +64,9 @@ def main():
 
     # 온라인 강의
     play = "vc-front-screen-play-btn"
+    play_ytb = "ytp-large-play-button.ytp-button.ytp-large-play-button-red-bg"
     volume_btn = "vc-pctrl-volume-btn"
+    volume_ytb = "ytp-mute-button.ytp-button"
 
     """
     button setting이 완료 되셨나요? 곧 시작합니다.
@@ -96,8 +98,12 @@ def main():
     # e-class 로그인
     browser.find_element(By.ID, userID).send_keys(yourID)
     browser.find_element(By.ID, userPW).send_keys(yourPW)
-    browser.find_element(By.CLASS_NAME, login).click()
-    browser.implicitly_wait(Delay)
+    try:
+        browser.find_element(By.CLASS_NAME, login).click()
+        browser.implicitly_wait(Delay)
+    
+    except:
+        print("로그인 실패. 아이디 혹은 비밀번호가 맞지 않습니다.")
 
     # 과목 찾기
     subjects = browser.find_elements(By.CLASS_NAME, open_subject)
@@ -160,6 +166,11 @@ def main():
                     lectures_per_week[lecture_i].click()
                     browser.implicitly_wait(Delay)
 
+                    if AlertProcessing(browser): # 강의 출석인정기간이 지났다면 continue
+                        continue
+
+                    other_device(browser) # 다른 기기에서 강의를 접속하고 있다면 다른 기기에서의 접속을 해제하고 본 프로그램에서 접속
+
                     if first:
                         print("\n\n\n\n")
                         first = False
@@ -176,11 +187,22 @@ def main():
                     )
                     browser.switch_to.frame(iframe)
 
-                    play_button = browser.find_element(By.CLASS_NAME, play)
-                    volume_button = browser.find_element(By.CLASS_NAME, volume_btn)
-                
-                    play_button.click()
-                    volume_button.click()
+                    try: # 온라인 강의가 동영상일 때
+                        print("Video")
+                        play_button = browser.find_element(By.CLASS_NAME, play)
+                        volume_button = browser.find_element(By.CLASS_NAME, volume_btn)
+                        browser.implicitly_wait(Delay)
+                        play_button.click()
+                        volume_button.click()
+
+                    except: # 온라인 강의가 유튜브일 때
+                        print("Youtube")
+                        play_ytb_button = browser.find_element(By.CLASS_NAME, play_ytb)
+                        volume_ytb_button = browser.find_element(By.CLASS_NAME, volume_ytb)
+                        browser.implicitly_wait(Delay)
+                        play_ytb_button.click()
+                        volume_ytb_button.click()
+
                     time.sleep(0.5)
 
                     browser.switch_to.default_content()
